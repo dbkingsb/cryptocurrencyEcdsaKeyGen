@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'groovy'
+    id 'jacoco'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+repositories {
+    jcenter()
+
+    // Local maven repository for bitcoinj dependency
+    mavenLocal()
+}
+
+dependencies {
+    testCompile (
+            'junit:junit:4.12',
+            'org.codehaus.groovy:groovy-all:2.4.4',
+            'org.spockframework:spock-core:1.0-groovy-2.4'
+    )
+
+    // Core library from bitcoinj (ECKey, Address, etc)
+    compile 'org.bitcoinj:bitcoinj-core:0.15-SNAPSHOT'
+}
+
+mainClassName = 'com.ubrgk.crypto.App'
+
