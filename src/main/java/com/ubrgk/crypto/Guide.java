@@ -19,7 +19,7 @@ class Guide {
         doDisclaimer(sc);
         final Crypto crypto = doSelectCryptoType(sc);
         final String filePath = doGenerateFile(sc, crypto);
-        doEncryptionSuggestion(filePath);
+        doEncryptionExample(filePath);
     }
 
     /**
@@ -117,13 +117,15 @@ class Guide {
         return filePath;
     }
 
-    private void doEncryptionSuggestion(final String filePath) {
-        println("The following is an encryption suggestion WITHOUT ANY WARRANTY:");
-        println("- Use an implementation of OpenPGP (e.g. PGP, GPG) to encrypt the generated file.");
-        println("- The following is an example using GPG:");
+    private void doEncryptionExample(final String filePath) {
+        println("");
+        println("The following is an encryption example WITHOUT ANY WARRANTY, that uses");
+        println("an implementation of OpenPGP to encrypt the generated file.");
+        println("Encrypt:");
         println("  gpg --armor --symmetric --cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-count 65011712 " + filePath);
-        println("- The above command will prompt you for a passphrase. The passphrase should be long and random.");
-        println("- The following is an example of decrypting using GPG:");
+        println("  (The above command will prompt you for a passphrase. The passphrase");
+        println("  should be long and random.)");
+        println("Decrypt:");
         println("  gpg -d " + filePath);
     }
 
