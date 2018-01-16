@@ -41,7 +41,7 @@ final class FileWallet {
             throw new AssertionError(e);
         }
 
-        List<ECKey> ecKeys = new ArrayList<>();
+        final List<ECKey> ecKeys = new ArrayList<>();
         for (int i=0; i<numberOfAddress; i++) {
             final ECKey ecKey = new ECKey(secureRandom);
             ecKeys.add(ecKey);
@@ -52,7 +52,7 @@ final class FileWallet {
         return ecKeys;
     }
 
-    public static void saveKeys(final String filePath, final List<ECKey> ecKeys, final AbstractBitcoinNetParams netParams, Crypto crypto, final Scanner sc) throws IOException {
+    public static void saveKeys(final String filePath, final List<ECKey> ecKeys, final AbstractBitcoinNetParams netParams, final Crypto crypto, final Scanner sc) throws IOException {
         final List<String> headerRow = new ArrayList<>();
         headerRow.add("Crypto-currency Type");
         headerRow.add("Date Generated");
@@ -70,7 +70,7 @@ final class FileWallet {
         );
         final String date = dateFormatter.format(new Date());
 
-        for (ECKey ecKey : ecKeys) {
+        for (final ECKey ecKey : ecKeys) {
             final List<String> fullRow = new ArrayList<>();
             fullRow.add(crypto.name());
             fullRow.add(date);
@@ -120,7 +120,7 @@ final class FileWallet {
         println("... saved.");
     }
 
-    private static String toCsv(List<List<String>> rows) {
+    private static String toCsv(final List<List<String>> rows) {
         final StringBuilder contentBuilder = new StringBuilder();
         for (final List<String> row : rows) {
             for (int i=0; i<row.size(); i++) {

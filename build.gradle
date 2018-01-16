@@ -3,6 +3,8 @@ plugins {
     id 'application'
     id 'groovy'
     id 'jacoco'
+    id 'pmd'
+    id 'findbugs'
     id 'com.github.johnrengelman.shadow' version '2.0.2'
 }
 
@@ -22,6 +24,37 @@ dependencies {
 
     // Core library from bitcoinj (ECKey, Address, etc)
     compile 'org.bitcoinj:bitcoinj-core:0.15-SNAPSHOT'
+
+    // annotation used to suppress findbugs false positives
+    compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
+}
+
+pmd {
+    ruleSets = [
+            "java-basic",
+            "java-braces",
+            "java-clone",
+            "java-codesize",
+            "java-design",
+            "java-empty",
+            "java-finalizers",
+            "java-imports",
+            "java-junit",
+            "java-optimizations",
+            "java-strictexception",
+            "java-strings",
+            "java-sunsecure",
+            "java-typeresolution",
+            "java-unnecessary",
+            "java-unusedcode"
+    ]
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
 }
 
 mainClassName = 'com.ubrgk.crypto.App'
