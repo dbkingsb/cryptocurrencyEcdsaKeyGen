@@ -22,11 +22,14 @@ dependencies {
             'org.spockframework:spock-core:1.0-groovy-2.4'
     )
 
-    // Core library from bitcoinj (ECKey, Address, etc)
+    // core library from bitcoinj (ECKey, Address, etc)
     compile 'org.bitcoinj:bitcoinj-core:0.15-SNAPSHOT'
 
     // annotation used to suppress findbugs false positives
     compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
+
+    // parse json for test vectors
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
 }
 
 pmd {
