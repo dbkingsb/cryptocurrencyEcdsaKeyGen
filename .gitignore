@@ -1,45 +1,21 @@
-### IntelliJ
-out/
+# IntelliJ IDEA is an IDE for developement of this project
 .idea
-.idea_modules/
+out/
 
-# JIRA plugi
-
-### Gradle template
+# gradle
 .gradle
-/build/
+build/
 
-# Ignore Gradle GUI config
-gradle-app.setting
+# just in case an jar files end up outside the build directory
+*.jar
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+# save the gradle-wrapper so gradle is not needed to build
 !gradle-wrapper.jar
 
-# Cache of project
-.gradletasknamecache
-
-# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
-# gradle/wrapper/gradle-wrapper.properties
-### Java template
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# common file extensions that might be present while testing
+*.csv
+*.txt
+*.xls
+*.asc
+*.gpg
+*.pgp
