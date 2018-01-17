@@ -5,18 +5,12 @@ import org.bitcoinj.core.ECKey;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  *
@@ -25,8 +19,6 @@ import java.util.Scanner;
 final class FileWallet {
 
     private static final String CSV_DELIMITER = ",";
-
-    static final String LABEL_PUBLIC_ADDRESSES_ONLY = "-public_addresses_only";
 
     private FileWallet() {
     }
@@ -52,7 +44,7 @@ final class FileWallet {
         return ecKeys;
     }
 
-    public static void saveKeys(final String filePath, final List<ECKey> ecKeys, final AbstractBitcoinNetParams netParams, final Crypto crypto, final Scanner sc) throws IOException {
+    public static List<List<String>> createFullRows(List<ECKey> ecKeys, Crypto crypto) {
         final List<String> headerRow = new ArrayList<>();
         headerRow.add("Crypto-currency Type");
         headerRow.add("Date Generated");
@@ -61,8 +53,6 @@ final class FileWallet {
         headerRow.add("Address");
         final List<List<String>> fullRows = new ArrayList<>();
         fullRows.add(headerRow);
-        final List<List<String>> addressOnlyRows = new ArrayList<>();
-        addressOnlyRows.add(headerRow.subList(4,5));
 
         final DateFormat dateFormatter = DateFormat.getDateTimeInstance(
                 DateFormat.LONG,
@@ -75,67 +65,39 @@ final class FileWallet {
             fullRow.add(crypto.name());
             fullRow.add(date);
             fullRow.add(ecKey.getPrivateKeyAsHex());
-            fullRow.add(ecKey.getPrivateKeyAsWiF(netParams));
-            fullRow.add(ecKey.toAddress(netParams).toString());
+            fullRow.add(ecKey.getPrivateKeyAsWiF(crypto.getNetParams()));
+            fullRow.add(ecKey.toAddress(crypto.getNetParams()).toString());
             fullRows.add(fullRow);
-            final List<String> addressOnlyRow = new ArrayList<>();
-            addressOnlyRow.add(ecKey.toAddress(netParams).toString());
-            addressOnlyRows.add(addressOnlyRow);
         }
-
-        /*
-         * Create full file
-         */
-
-        final String fullContent = toCsv(fullRows);
-        createFile(filePath, fullContent, sc);
-
-        /*
-         * Create public address only file
-         */
-
-        final String addressOnlyContent = toCsv(addressOnlyRows);
-        final String addressOnlyFilePath = filePath.substring(0, filePath.length() - Guide.CSV_EXTENTION.length())
-                + LABEL_PUBLIC_ADDRESSES_ONLY + Guide.CSV_EXTENTION;
-        createFile(addressOnlyFilePath, addressOnlyContent, sc);
+        return fullRows;
     }
 
-    private static void createFile(final String filePath, final String content, final Scanner sc) throws IOException {
-        final Path path = Paths.get(filePath);
-        println("Saving file " + path + "...");
-        try {
-            Files.createFile(path);
-        } catch (FileAlreadyExistsException e) {
-            print("File already exists, overwrite? (y/N) ");
-            final String overwriteAnswer = sc.next();
-            if ("y".equals(overwriteAnswer)) {
-                println("Overwriting file...");
-            } else {
-                println("Aborted.");
-                System.exit(0);
-            }
+    public static List<List<String>> getOnlyPub(List<List<String>> fullRows) {
+        List<List<String>> onlyPubRows = new ArrayList<>();
+        for (List<String> fullRow : fullRows) {
+            List<String> onlyPubRow = new ArrayList<>();
+            onlyPubRow.add(fullRow.get(0));
+            onlyPubRow.add(fullRow.get(1));
+            onlyPubRow.add(fullRow.get(4));
+            onlyPubRows.add(onlyPubRow);
         }
-        final byte[] strToBytes = content.getBytes(StandardCharsets.UTF_8);
-        Files.write(path, strToBytes);
-        println("... saved.");
+        return onlyPubRows;
     }
 
-    private static String toCsv(final List<List<String>> rows) {
+    public static String toCsv(final List<List<String>> rows) {
         final StringBuilder contentBuilder = new StringBuilder();
         for (final List<String> row : rows) {
-            for (int i=0; i<row.size(); i++) {
-                row.set(i, "\"" + row.get(i) + "\"");
+            final ArrayList<String> toJoin = new ArrayList<>();
+            for (String fields : row) {
+                toJoin.add("\"" + fields + "\"");
             }
-            contentBuilder.append(String.join(",", row));
+            contentBuilder.append(String.join(",", toJoin));
             contentBuilder.append("\r\n");
         }
         return contentBuilder.toString();
     }
 
-    public static void verify(final String filePath, final AbstractBitcoinNetParams netParams) throws IOException {
-        println("Reading file for verification...");
-        final Path path = Paths.get(filePath);
-        List<String> lines = Files.readAllLines(path);
+    public static void verify(List<String> lines, final AbstractBitcoinNetParams netParams) throws IOException {
         // Remove header
         lines = lines.subList(1, lines.size());
         println("... file read.");
@@ -161,7 +123,6 @@ final class FileWallet {
 
             if (!expectedPrivateKeyAsWiF.equals(actualPrivateKeyWif)
                     || !expectedAddress.equals(actualAddress)) {
-                Files.move(path, path.resolveSibling(filePath + "-failed_verification"));
                 throw new AssertionError("Verification of address number " + i + " failed!");
             }
         }

@@ -4,7 +4,12 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bitcoinj.core.ECKey;
 
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,12 +18,18 @@ import java.util.Scanner;
  */
 class Guide {
     public static final String CSV_EXTENTION = ".csv";
+    private static final String LABEL_PUBLIC_ADDRESSES_ONLY = "-public_addresses_only";
 
     void go() {
         final Scanner sc = new Scanner(System.in, StandardCharsets.UTF_8.displayName());
         doDisclaimer(sc);
         final Crypto crypto = doSelectCryptoType(sc);
-        final String filePath = doGenerateFile(sc, crypto);
+        final String filePath;
+        try {
+            filePath = doGenerateFiles(sc, crypto);
+        } catch (IOException e) {
+            throw new UndeclaredThrowableException(e);
+        }
         doEncryptionExample(filePath);
     }
 
@@ -77,7 +88,7 @@ class Guide {
         return value;
     }
 
-    private String doGenerateFile(final Scanner sc, final Crypto crypto) {
+    private String doGenerateFiles(final Scanner sc, final Crypto crypto) throws IOException {
         /*
          * Generate content
          */
@@ -85,6 +96,8 @@ class Guide {
         askForInput("How many addresses to generate?");
         final int addressCount = sc.nextInt();
         final List<ECKey> ecKeys = FileWallet.generateKeys(addressCount);
+        final List<List<String>> rows = FileWallet.createFullRows(ecKeys, crypto);
+        final String fullContent = FileWallet.toCsv(rows);
 
         /*
          * Save file
@@ -93,28 +106,52 @@ class Guide {
         askForInput("Name (path) for file?");
         final String userFilePath = sc.next();
         final String filePath = userFilePath + CSV_EXTENTION;
-
-        try {
-            FileWallet.saveKeys(filePath, ecKeys, crypto.getNetParams(), crypto, sc);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        writeContentToFile(sc, fullContent, filePath);
 
         /*
          * Verify file
          */
 
+        println("Reading file for verification...");
+        final Path path = Paths.get(filePath);
+        List<String> lines = Files.readAllLines(path);
         try {
-            FileWallet.verify(filePath, crypto.getNetParams());
-        } catch (IOException e) {
-            throw new AssertionError(e);
+            FileWallet.verify(lines, crypto.getNetParams());
+        } catch (AssertionError e) {
+            Files.move(path, path.resolveSibling(filePath + "-failed_verification"));
+            System.exit(0);
         }
 
         /*
          * Create public addresses file
          */
 
+        final List<List<String>> onlyPubRows = FileWallet.getOnlyPub(rows);
+        final String onlyPubContent = FileWallet.toCsv(onlyPubRows);
+        final String onlyPubFilePath = userFilePath + LABEL_PUBLIC_ADDRESSES_ONLY + CSV_EXTENTION;
+        writeContentToFile(sc, onlyPubContent, onlyPubFilePath);
+
         return filePath;
+    }
+
+    private void writeContentToFile(Scanner sc, String fullContent, String filePath) throws IOException {
+        final Path path = Paths.get(filePath);
+        println("Saving file " + path + "...");
+        try {
+            Files.createFile(path);
+        } catch (FileAlreadyExistsException e) {
+            print("File already exists, overwrite? (y/N) ");
+            final String overwriteAnswer = sc.next();
+            if ("y".equals(overwriteAnswer)) {
+                println("Overwriting file...");
+            } else {
+                println("Aborted.");
+                System.exit(0);
+            }
+        }
+        final byte[] strToBytes = fullContent.getBytes(StandardCharsets.UTF_8);
+        Files.write(path, strToBytes);
+        println("... saved.");
     }
 
     private void doEncryptionExample(final String filePath) {
@@ -139,5 +176,9 @@ class Guide {
 
     private void println(final String s) {
         System.out.println(s);
+    }
+
+    private void print(final String s) {
+        System.out.print(s);
     }
 }
