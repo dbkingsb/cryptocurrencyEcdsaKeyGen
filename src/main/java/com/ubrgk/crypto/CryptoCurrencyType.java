@@ -11,7 +11,7 @@ import org.bitcoinj.params.MainNetParams;
 /**
  *
  */
-public enum Crypto {
+public enum CryptoCurrencyType {
     BITCOIN("BTC", MainNetParams.get()),
     LITECOIN("LTC", LitecoinMainNetParams.get()),
     DASH("DASH", DashMainNetParams.get()),
@@ -22,7 +22,7 @@ public enum Crypto {
     private String abbreviation;
     private AbstractBitcoinNetParams netParams;
 
-    Crypto(final String abbreviation, final AbstractBitcoinNetParams netParams) {
+    CryptoCurrencyType(final String abbreviation, final AbstractBitcoinNetParams netParams) {
         this.abbreviation = abbreviation;
         this.netParams = netParams;
     }

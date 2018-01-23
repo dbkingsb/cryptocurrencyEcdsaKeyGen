@@ -19,11 +19,16 @@ import java.util.List;
 final class FileWallet {
 
     private static final String CSV_DELIMITER = ",";
+    static final String HEADER_CRYPTO_CURRENCY_TYPE = "Crypto-currency Type";
+    static final String HEADER_DATE_GENERATED = "Date Generated";
+    static final String HEADER_PRIVATE_KEY_HEX = "Private Key (Hex)";
+    static final String HEADER_PRIVATE_KEY_WIF = "Private Key (WIF)";
+    static final String HEADER_ADDRESS = "Address";
 
     private FileWallet() {
     }
 
-    public static List<ECKey> generateKeys(final int numberOfAddress) {
+    static List<ECKey> generateKeys(final int numberOfAddress) {
         println("Creating file content...");
 
         SecureRandom secureRandom;
@@ -44,13 +49,13 @@ final class FileWallet {
         return ecKeys;
     }
 
-    public static List<List<String>> createFullRows(List<ECKey> ecKeys, Crypto crypto) {
+    static List<List<String>> createLinesOfFields(List<ECKey> ecKeys, CryptoCurrencyType crypto) {
         final List<String> headerRow = new ArrayList<>();
-        headerRow.add("Crypto-currency Type");
-        headerRow.add("Date Generated");
-        headerRow.add("Private Key (Hex)");
-        headerRow.add("Private Key (WIF)");
-        headerRow.add("Address");
+        headerRow.add(HEADER_CRYPTO_CURRENCY_TYPE);
+        headerRow.add(HEADER_DATE_GENERATED);
+        headerRow.add(HEADER_PRIVATE_KEY_HEX);
+        headerRow.add(HEADER_PRIVATE_KEY_WIF);
+        headerRow.add(HEADER_ADDRESS);
         final List<List<String>> fullRows = new ArrayList<>();
         fullRows.add(headerRow);
 
@@ -72,7 +77,7 @@ final class FileWallet {
         return fullRows;
     }
 
-    public static List<List<String>> getOnlyPub(List<List<String>> fullRows) {
+    static List<List<String>> getOnlyPubFields(List<List<String>> fullRows) {
         List<List<String>> onlyPubRows = new ArrayList<>();
         for (List<String> fullRow : fullRows) {
             List<String> onlyPubRow = new ArrayList<>();
@@ -84,7 +89,7 @@ final class FileWallet {
         return onlyPubRows;
     }
 
-    public static String toCsv(final List<List<String>> rows) {
+    static String toCsv(final List<List<String>> rows) {
         final StringBuilder contentBuilder = new StringBuilder();
         for (final List<String> row : rows) {
             final ArrayList<String> toJoin = new ArrayList<>();
@@ -97,7 +102,7 @@ final class FileWallet {
         return contentBuilder.toString();
     }
 
-    public static void verify(List<String> lines, final AbstractBitcoinNetParams netParams) throws IOException {
+    static void verify(List<String> lines, final AbstractBitcoinNetParams netParams) throws IOException {
         // Remove header
         lines = lines.subList(1, lines.size());
         println("... file read.");

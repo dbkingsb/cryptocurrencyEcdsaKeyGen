@@ -30,6 +30,12 @@ dependencies {
 
     // parse json for test vectors
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.3'
+
+    // logging required by bitcoinj
+//    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+//    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+
 }
 
 pmd {

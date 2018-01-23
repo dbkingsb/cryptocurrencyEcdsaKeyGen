@@ -4,7 +4,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.bitcoinj.core.ECKey;
 
 import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -19,19 +18,6 @@ import java.util.Scanner;
 class Guide {
     public static final String CSV_EXTENTION = ".csv";
     private static final String LABEL_PUBLIC_ADDRESSES_ONLY = "-public_addresses_only";
-
-    void go() {
-        final Scanner sc = new Scanner(System.in, StandardCharsets.UTF_8.displayName());
-        doDisclaimer(sc);
-        final Crypto crypto = doSelectCryptoType(sc);
-        final String filePath;
-        try {
-            filePath = doGenerateFiles(sc, crypto);
-        } catch (IOException e) {
-            throw new UndeclaredThrowableException(e);
-        }
-        doEncryptionExample(filePath);
-    }
 
     /**
      * Print a summary of the license and a warning about the dangers of managing
@@ -68,9 +54,9 @@ class Guide {
         }
     }
 
-    Crypto doSelectCryptoType(final Scanner sc) {
-        final Crypto[] values = Crypto.values();
-        Crypto value = null;
+    CryptoCurrencyType doSelectCryptoType(final Scanner sc) {
+        final CryptoCurrencyType[] values = CryptoCurrencyType.values();
+        CryptoCurrencyType value = null;
         while (value == null) {
             println("Supported crypto-currency types:");
             for (int i = 0; i < values.length; i++) {
@@ -88,16 +74,17 @@ class Guide {
         return value;
     }
 
-    private String doGenerateFiles(final Scanner sc, final Crypto crypto) throws IOException {
+    String doGenerateFiles(final Scanner sc, final CryptoCurrencyType crypto) throws IOException {
         /*
          * Generate content
          */
 
         askForInput("How many addresses to generate?");
+        // TODO catch input mismatch exception to try again
         final int addressCount = sc.nextInt();
         final List<ECKey> ecKeys = FileWallet.generateKeys(addressCount);
-        final List<List<String>> rows = FileWallet.createFullRows(ecKeys, crypto);
-        final String fullContent = FileWallet.toCsv(rows);
+        final List<List<String>> rows = FileWallet.createLinesOfFields(ecKeys, crypto);
+        final String content = FileWallet.toCsv(rows);
 
         /*
          * Save file
@@ -106,7 +93,7 @@ class Guide {
         askForInput("Name (path) for file?");
         final String userFilePath = sc.next();
         final String filePath = userFilePath + CSV_EXTENTION;
-        writeContentToFile(sc, fullContent, filePath);
+        writeContentToFile(sc, content, filePath);
 
         /*
          * Verify file
@@ -126,8 +113,8 @@ class Guide {
          * Create public addresses file
          */
 
-        final List<List<String>> onlyPubRows = FileWallet.getOnlyPub(rows);
-        final String onlyPubContent = FileWallet.toCsv(onlyPubRows);
+        final List<List<String>> onlyPubFieldsRows = FileWallet.getOnlyPubFields(rows);
+        final String onlyPubContent = FileWallet.toCsv(onlyPubFieldsRows);
         final String onlyPubFilePath = userFilePath + LABEL_PUBLIC_ADDRESSES_ONLY + CSV_EXTENTION;
         writeContentToFile(sc, onlyPubContent, onlyPubFilePath);
 
@@ -154,14 +141,12 @@ class Guide {
         println("... saved.");
     }
 
-    private void doEncryptionExample(final String filePath) {
+    void doEncryptionExample(final String filePath) {
         println("");
         println("The following is an encryption example WITHOUT ANY WARRANTY, that uses");
         println("an implementation of OpenPGP to encrypt the generated file.");
         println("Encrypt:");
         println("  gpg --armor --symmetric --cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-count 65011712 " + filePath);
-        println("  (The above command will prompt you for a passphrase. The passphrase");
-        println("  should be long and random.)");
         println("Decrypt:");
         println("  gpg -d " + filePath);
     }
