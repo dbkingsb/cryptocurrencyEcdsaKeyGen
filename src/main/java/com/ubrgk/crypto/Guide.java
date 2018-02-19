@@ -15,8 +15,9 @@ import java.util.Scanner;
 /**
  *
  */
+@SuppressFBWarnings("DM_EXIT")
 class Guide {
-    public static final String CSV_EXTENTION = ".csv";
+    private static final String CSV_EXTENTION = ".csv";
     private static final String LABEL_PUBLIC_ADDRESSES_ONLY = "-public_addresses_only";
 
     /**
@@ -25,7 +26,6 @@ class Guide {
      *
      * Suppress DM_EXIT because this application is intended to be executed alone.
      */
-    @SuppressFBWarnings("DM_EXIT")
     void doDisclaimer(final Scanner sc) {
         println("------------------------------------ LICENSE ------------------------------------");
         println("| THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR    |");
@@ -101,7 +101,7 @@ class Guide {
 
         println("Reading file for verification...");
         final Path path = Paths.get(filePath);
-        List<String> lines = Files.readAllLines(path);
+        final List<String> lines = Files.readAllLines(path);
         try {
             FileWallet.verify(lines, crypto.getNetParams());
         } catch (AssertionError e) {
@@ -121,7 +121,7 @@ class Guide {
         return filePath;
     }
 
-    private void writeContentToFile(Scanner sc, String fullContent, String filePath) throws IOException {
+    private void writeContentToFile(final Scanner sc, final String fullContent, final String filePath) throws IOException {
         final Path path = Paths.get(filePath);
         println("Saving file " + path + "...");
         try {

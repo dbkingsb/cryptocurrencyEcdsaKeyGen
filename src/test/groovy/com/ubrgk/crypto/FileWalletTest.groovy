@@ -1,10 +1,12 @@
 package com.ubrgk.crypto
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import org.bitcoinj.core.ECKey
 import spock.lang.Specification
 /**
  *
  */
+@SuppressFBWarnings("SE_NO_SERIALVERSIONID")
 class FileWalletTest extends Specification {
     def "generate keys"() {
         given: "a desired number of keys to generate"

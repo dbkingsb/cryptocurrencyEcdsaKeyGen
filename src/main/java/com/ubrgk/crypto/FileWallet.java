@@ -31,7 +31,7 @@ final class FileWallet {
     static List<ECKey> generateKeys(final int numberOfAddress) {
         println("Creating file content...");
 
-        SecureRandom secureRandom;
+        final SecureRandom secureRandom;
         try {
             secureRandom = SecureRandom.getInstanceStrong();
         } catch (NoSuchAlgorithmException e) {
@@ -49,7 +49,7 @@ final class FileWallet {
         return ecKeys;
     }
 
-    static List<List<String>> createLinesOfFields(List<ECKey> ecKeys, CryptoCurrencyType crypto) {
+    static List<List<String>> createLinesOfFields(final List<ECKey> ecKeys, final CryptoCurrencyType crypto) {
         final List<String> headerRow = new ArrayList<>();
         headerRow.add(HEADER_CRYPTO_CURRENCY_TYPE);
         headerRow.add(HEADER_DATE_GENERATED);
@@ -77,10 +77,10 @@ final class FileWallet {
         return fullRows;
     }
 
-    static List<List<String>> getOnlyPubFields(List<List<String>> fullRows) {
-        List<List<String>> onlyPubRows = new ArrayList<>();
-        for (List<String> fullRow : fullRows) {
-            List<String> onlyPubRow = new ArrayList<>();
+    static List<List<String>> getOnlyPubFields(final List<List<String>> fullRows) {
+        final List<List<String>> onlyPubRows = new ArrayList<>();
+        for (final List<String> fullRow : fullRows) {
+            final List<String> onlyPubRow = new ArrayList<>();
             onlyPubRow.add(fullRow.get(0));
             onlyPubRow.add(fullRow.get(1));
             onlyPubRow.add(fullRow.get(4));
@@ -93,7 +93,7 @@ final class FileWallet {
         final StringBuilder contentBuilder = new StringBuilder();
         for (final List<String> row : rows) {
             final ArrayList<String> toJoin = new ArrayList<>();
-            for (String fields : row) {
+            for (final String fields : row) {
                 toJoin.add("\"" + fields + "\"");
             }
             contentBuilder.append(String.join(",", toJoin));
@@ -102,9 +102,9 @@ final class FileWallet {
         return contentBuilder.toString();
     }
 
-    static void verify(List<String> lines, final AbstractBitcoinNetParams netParams) throws IOException {
+    static void verify(final List<String> linesWithHeader, final AbstractBitcoinNetParams netParams) throws IOException {
         // Remove header
-        lines = lines.subList(1, lines.size());
+        final List<String> lines = linesWithHeader.subList(1, linesWithHeader.size());
         println("... file read.");
 
         println("Verifying " + lines.size() + " addresses...");
@@ -132,10 +132,6 @@ final class FileWallet {
             }
         }
         println("... addresses verified.");
-    }
-
-    private static void print(final String s) {
-        System.out.print(s);
     }
 
     private static void println(final String s) {
