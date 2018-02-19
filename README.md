@@ -20,10 +20,7 @@ Crypto-currency Type	Date Generated	Private Key (Hex)	Private Key (WIF)	Address
 **Public-only Headers**
 
 ```
-Crypto-currency Type	Date Generated						Address
-BITCOIN					February 18, 2018 11:00:13 PM EST	1Cp9fD9y2WpBmdKYfXQTfDLrxKVyYCn4qd
-BITCOIN					February 18, 2018 11:00:13 PM EST	1NQay6mDvRb4coSupDmeptV9ZSTfXphJ28
-BITCOIN					February 18, 2018 11:00:13 PM EST	18MYEYgNqM31uid9USSTe3heaGWMPeDYWk
+Crypto-currency Type	Date Generated	Address
 ...
 ```
 
@@ -44,6 +41,13 @@ java -jar build/libs/cryptocurrencyKeyGen-all.jar
 - Reddcoin
 - Vertcoin
 
+## Example method of encryption
+
+The following is an example of how the private file could be encrypted. This example uses Open PGP.
+
+`gpg --armor --symmetric --cipher-algo AES256 --s2k-digest-algo SHA512 --s2k-count 65011712 [path to file]`
+
+The following is the command one could issue to decrypt the result of the above command: `gpg -d`.
 
 
 
