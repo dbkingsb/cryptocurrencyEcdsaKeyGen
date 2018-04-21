@@ -2,7 +2,7 @@
 
 Generate ECDSA keys, and their various encodings, for common cryptocurrencies.
 
-This program exists to satisfy a desire for long-term storage with the fewest dependencies on software wallets implmentations.
+This program exists to satisfy a desire for long-term storage with the fewest dependencies on software wallets implementations.
 
 Produce a pair of CSV files:
 
