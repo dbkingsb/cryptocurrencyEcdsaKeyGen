@@ -20,5 +20,6 @@ final public class App {
         final String filePath;
         filePath = guide.doGenerateFiles(sc, crypto);
         guide.doEncryptionExample(filePath);
+        System.exit(0);
     }
 }
