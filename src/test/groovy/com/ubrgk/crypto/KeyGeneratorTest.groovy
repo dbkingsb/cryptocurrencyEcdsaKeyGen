@@ -1,20 +1,27 @@
 package com.ubrgk.crypto
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import spock.lang.Specification
 
 /**
  *
  */
+@SuppressFBWarnings("SE_NO_SERIALVERSIONID")
 class KeyGeneratorTest extends Specification {
 
-    def "GenerateKeys"() {
-        given: 'the desire to make 256 keys'
-        def numOfKeys = 256
+    def "Generate keys"() {
+        given: "a desired number of keys to generate"
+        def numKeysToGen = 256
 
-        when: 'the keys are generated'
-        def keys = KeyGenerator.generateKeys(numOfKeys)
+        when: "the keys are generated"
+        def keys = KeyGenerator.generateKeys(numKeysToGen)
 
-        then: 'the number of generated key is 256'
-        keys.size() == numOfKeys
+        then: "an equal number of ECDSA keys are returned"
+        keys.size() == numKeysToGen
+
+        then: "the public keys are compressed"
+        keys.each {
+            it.isCompressed()
+        }
     }
 }

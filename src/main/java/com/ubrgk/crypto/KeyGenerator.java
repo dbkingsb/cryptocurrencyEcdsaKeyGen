@@ -10,7 +10,10 @@ import java.util.List;
 /**
  *
  */
-public class KeyGenerator {
+@SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+final class KeyGenerator {
+    private KeyGenerator() {}
+
     public static List<ECKey> generateKeys(final int numberOfAddress) {
         final SecureRandom secureRandom;
         try {

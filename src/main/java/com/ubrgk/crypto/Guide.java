@@ -112,7 +112,7 @@ class Guide {
          */
 
         askForInput("Name for file (e.g. \"my-keys\")?");
-        String userFilePath = sc.next();
+        final String userFilePath = sc.next();
         final String filePath = userFilePath + CSV_EXTENTION;
         writeContentToFile(sc, content, filePath);
 
