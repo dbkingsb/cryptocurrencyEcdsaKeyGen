@@ -1,10 +1,11 @@
 package com.ubrgk.crypto.netparams
 
-import com.ubrgk.crypto.netparams.VertcoinMainNetParams
 import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.LegacyAddress
 import org.bitcoinj.core.Utils
 import spock.lang.Specification
 import spock.lang.Subject
+
 /**
  *
  */
@@ -29,7 +30,7 @@ class VertcoinMainNetParamsTest extends Specification {
 
         then: 'known wif and address are as expected'
         key.getPrivateKeyAsWiF(netParams) == privateWif
-        key.toAddress(netParams).toString() == publicAddress
+        LegacyAddress.fromKey(netParams, key).toString() == publicAddress
     }
 
     def "Verify net params produce valid private WIF (uncompressed) and public address (uncompressed)"() {
@@ -43,6 +44,6 @@ class VertcoinMainNetParamsTest extends Specification {
 
         then: 'known wif and address are as expected'
         key.getPrivateKeyAsWiF(netParams) == privateWif
-        key.toAddress(netParams).toString() == publicAddress
+        LegacyAddress.fromKey(netParams, key).toString() == publicAddress
     }
 }

@@ -2,11 +2,9 @@ package com.ubrgk.crypto;
 
 import com.google.common.io.BaseEncoding;
 import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.LegacyAddress;
 import org.bitcoinj.params.AbstractBitcoinNetParams;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +14,7 @@ import java.util.List;
  *
  */
 @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-final class FileWallet {
+final class CsvBuilder {
 
     private static final String CSV_DELIMITER = ",";
     static final String HEADER_CRYPTO_CURRENCY_TYPE = "Crypto-currency Type";
@@ -25,28 +23,7 @@ final class FileWallet {
     static final String HEADER_PRIVATE_KEY_WIF = "Private Key (WIF)";
     static final String HEADER_ADDRESS = "Address";
 
-    private FileWallet() {
-    }
-
-    static List<ECKey> generateKeys(final int numberOfAddress) {
-        println("Creating file content...");
-
-        final SecureRandom secureRandom;
-        try {
-            secureRandom = SecureRandom.getInstanceStrong();
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError(e);
-        }
-
-        final List<ECKey> ecKeys = new ArrayList<>();
-        for (int i=0; i<numberOfAddress; i++) {
-            final ECKey ecKey = new ECKey(secureRandom);
-            ecKeys.add(ecKey);
-        }
-
-        println("... generated " + ecKeys.size() + " addresses.");
-
-        return ecKeys;
+    private CsvBuilder() {
     }
 
     static List<List<String>> createLinesOfFields(final List<ECKey> ecKeys, final CryptoCurrencyType crypto) {
@@ -71,7 +48,7 @@ final class FileWallet {
             fullRow.add(date);
             fullRow.add(ecKey.getPrivateKeyAsHex());
             fullRow.add(ecKey.getPrivateKeyAsWiF(crypto.getNetParams()));
-            fullRow.add(ecKey.toAddress(crypto.getNetParams()).toString());
+            fullRow.add(LegacyAddress.fromKey(crypto.getNetParams(), ecKey).toString());
             fullRows.add(fullRow);
         }
         return fullRows;
@@ -102,7 +79,7 @@ final class FileWallet {
         return contentBuilder.toString();
     }
 
-    static void verify(final List<String> linesWithHeader, final AbstractBitcoinNetParams netParams) throws IOException {
+    static void verify(final List<String> linesWithHeader, final AbstractBitcoinNetParams netParams) {
         // Remove header
         final List<String> lines = linesWithHeader.subList(1, linesWithHeader.size());
         println("... file read.");
@@ -124,7 +101,7 @@ final class FileWallet {
 
             final ECKey ecKey = ECKey.fromPrivate(actualPrivateKey);
             final String expectedPrivateKeyAsWiF = ecKey.getPrivateKeyAsWiF(netParams);
-            final String expectedAddress = ecKey.toAddress(netParams).toString();
+            final String expectedAddress = LegacyAddress.fromKey(netParams, ecKey).toString();
 
             if (!expectedPrivateKeyAsWiF.equals(actualPrivateKeyWif)
                     || !expectedAddress.equals(actualAddress)) {

@@ -9,6 +9,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -63,12 +64,21 @@ class Guide {
                 println(" " + i + ". " + values[i].getAbbreviation());
             }
             askForInput("Which crypto?");
-            final int menuSelection = sc.nextInt();
+
+            int menuSelection;
+            try {
+                menuSelection = sc.nextInt();
+            } catch (InputMismatchException e) {
+                println(getInvalidSelectionResponse("non-numeric"));
+                sc.next();
+                continue;
+            }
+
             try {
                 value = values[menuSelection];
                 println("Selected " + value);
             } catch (ArrayIndexOutOfBoundsException e) {
-                println(getInvalidSelectionResponse(menuSelection));
+                println(getInvalidSelectionResponse(String.valueOf(menuSelection)));
             }
         }
         return value;
@@ -79,19 +89,30 @@ class Guide {
          * Generate content
          */
 
-        askForInput("How many addresses to generate?");
-        // TODO catch input mismatch exception to try again
-        final int addressCount = sc.nextInt();
-        final List<ECKey> ecKeys = FileWallet.generateKeys(addressCount);
-        final List<List<String>> rows = FileWallet.createLinesOfFields(ecKeys, crypto);
-        final String content = FileWallet.toCsv(rows);
+        Integer addressCount = null;
+        while (addressCount == null) {
+            askForInput("How many addresses to generate?");
+            try {
+                addressCount = sc.nextInt();
+            } catch (InputMismatchException e) {
+                println(getInvalidSelectionResponse("non-numeric"));
+                sc.next();
+            }
+        }
+
+        println("Creating file content...");
+        final List<ECKey> ecKeys = KeyGenerator.generateKeys(addressCount);
+        println("... generated " + ecKeys.size() + " addresses.");
+
+        final List<List<String>> rows = CsvBuilder.createLinesOfFields(ecKeys, crypto);
+        final String content = CsvBuilder.toCsv(rows);
 
         /*
          * Save file
          */
 
-        askForInput("Name (path) for file?");
-        final String userFilePath = sc.next();
+        askForInput("Name for file (e.g. \"my-keys\")?");
+        String userFilePath = sc.next();
         final String filePath = userFilePath + CSV_EXTENTION;
         writeContentToFile(sc, content, filePath);
 
@@ -103,7 +124,7 @@ class Guide {
         final Path path = Paths.get(filePath);
         final List<String> lines = Files.readAllLines(path);
         try {
-            FileWallet.verify(lines, crypto.getNetParams());
+            CsvBuilder.verify(lines, crypto.getNetParams());
         } catch (AssertionError e) {
             Files.move(path, path.resolveSibling(filePath + "-failed_verification"));
             System.exit(0);
@@ -113,8 +134,8 @@ class Guide {
          * Create public addresses file
          */
 
-        final List<List<String>> onlyPubFieldsRows = FileWallet.getOnlyPubFields(rows);
-        final String onlyPubContent = FileWallet.toCsv(onlyPubFieldsRows);
+        final List<List<String>> onlyPubFieldsRows = CsvBuilder.getOnlyPubFields(rows);
+        final String onlyPubContent = CsvBuilder.toCsv(onlyPubFieldsRows);
         final String onlyPubFilePath = userFilePath + LABEL_PUBLIC_ADDRESSES_ONLY + CSV_EXTENTION;
         writeContentToFile(sc, onlyPubContent, onlyPubFilePath);
 
@@ -151,7 +172,7 @@ class Guide {
         println("  gpg -d " + filePath);
     }
 
-    private String getInvalidSelectionResponse(final int menuOptionNumber) {
+    private String getInvalidSelectionResponse(final String menuOptionNumber) {
         return "Selected " + menuOptionNumber + "; invalid selection.";
     }
 

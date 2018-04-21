@@ -1,9 +1,11 @@
 package com.ubrgk.crypto.netparams
 
 import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.LegacyAddress
 import org.bitcoinj.core.Utils
 import spock.lang.Specification
 import spock.lang.Subject
+
 /**
  *
  */
@@ -27,6 +29,6 @@ class DashMainNetParamsTest extends Specification {
 
         then: 'known wif and address are as expected'
         key.getPrivateKeyAsWiF(netParams) == privateWif
-        key.toAddress(netParams).toString() == publicAddress
+        LegacyAddress.fromKey(netParams, key).toString() == publicAddress
     }
 }
